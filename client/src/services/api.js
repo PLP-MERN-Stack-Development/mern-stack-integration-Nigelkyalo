@@ -4,7 +4,7 @@ import axios from 'axios';
 
 // Create axios instance with base URL
 const api = axios.create({
-  baseURL: import.meta.env.VITE_API_URL || 'http://localhost:5000/api',
+  baseURL: import.meta.env.VITE_API_URL || 'http://localhost:3000/api',
   headers: {
     'Content-Type': 'application/json',
   },
@@ -16,6 +16,10 @@ api.interceptors.request.use(
     const token = localStorage.getItem('token');
     if (token) {
       config.headers.Authorization = `Bearer ${token}`;
+    }
+    // Don't set Content-Type for FormData, let browser set it with boundary
+    if (config.data instanceof FormData) {
+      delete config.headers['Content-Type'];
     }
     return config;
   },
@@ -58,13 +62,25 @@ export const postService = {
 
   // Create a new post
   createPost: async (postData) => {
-    const response = await api.post('/posts', postData);
+    const config = {};
+    if (postData instanceof FormData) {
+      config.headers = {
+        'Content-Type': 'multipart/form-data',
+      };
+    }
+    const response = await api.post('/posts', postData, config);
     return response.data;
   },
 
   // Update an existing post
   updatePost: async (id, postData) => {
-    const response = await api.put(`/posts/${id}`, postData);
+    const config = {};
+    if (postData instanceof FormData) {
+      config.headers = {
+        'Content-Type': 'multipart/form-data',
+      };
+    }
+    const response = await api.put(`/posts/${id}`, postData, config);
     return response.data;
   },
 

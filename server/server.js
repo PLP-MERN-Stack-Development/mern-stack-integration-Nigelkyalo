@@ -17,7 +17,7 @@ dotenv.config();
 
 // Initialize Express app
 const app = express();
-const PORT = process.env.PORT || 5000;
+const PORT = process.env.PORT || 3000;
 
 // Middleware
 app.use(cors());
@@ -45,14 +45,9 @@ app.get('/', (req, res) => {
   res.send('MERN Blog API is running');
 });
 
-// Error handling middleware
-app.use((err, req, res, next) => {
-  console.error(err.stack);
-  res.status(err.statusCode || 500).json({
-    success: false,
-    error: err.message || 'Server Error',
-  });
-});
+// Error handling middleware (must be after all routes)
+const errorHandler = require('./middleware/errorHandler');
+app.use(errorHandler);
 
 // Connect to MongoDB and start server
 mongoose
